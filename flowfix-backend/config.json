@@ -1,0 +1,44 @@
+{
+    "business_name": "FlowFix Plumbers",
+    "business_phone_number": "024 7600 1234",
+    "service_area_postcodes": [
+        "CV1",
+        "CV2",
+        "CV3",
+        "CV4",
+        "CV5",
+        "CV6",
+        "CV7",
+        "CV8"
+    ],
+    "business_hours": {
+        "start": "09:00",
+        "end": "17:00"
+    },
+    "price_list": {
+        "leaky_tap_repair": {
+            "name": "Leaky Tap Repair",
+            "estimate": "£70 - £110"
+        },
+        "boiler_repair": {
+            "name": "Boiler Repair",
+            "estimate": "£90 - £250 plus parts. A full diagnosis is required."
+        },
+        "blocked_drain": {
+            "name": "Blocked Drain",
+            "estimate": "£80 - £150"
+        },
+        "radiator_installation": {
+            "name": "Radiator Installation",
+            "estimate": "£150 - £300 per radiator, depending on size and complexity."
+        },
+        "bathroom_fitting": {
+            "name": "Bathroom Fitting",
+            "estimate": "This requires a custom on-site quote. Please book a free consultation."
+        }
+    },
+    "emergency_info": {
+        "fee": "£120",
+        "block_event_summary": "EMERGENCY BLOCK"
+    }
+}

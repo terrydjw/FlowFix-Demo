@@ -1,0 +1,259 @@
+.site-header {
+    background-color: var(--primary-blue);
+    color: var(--light-text);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.site-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.site-header-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--light-text);
+    text-decoration: none;
+}
+
+/* --- MODIFICATIONS & NEW STYLES --- */
+
+.site-header-nav {
+    display: flex;
+    gap: 1.5rem;
+    position: relative;
+    /* This is crucial for positioning the magic line */
+}
+
+.site-header-link {
+    color: var(--light-text);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 5px 0;
+    /* Add some padding for better hover feel */
+    position: relative;
+    z-index: 1;
+    /* Ensure links are clickable above the line */
+}
+
+/* This class can be used to style the active link differently if you wish */
+.site-header-link.is-active {
+   color: var(--accent-green); 
+}
+
+.magic-line {
+    position: absolute;
+    bottom: -5px;
+    /* Position it just below the links */
+    height: 3px;
+    background-color: var(--accent-green);
+    /* Assumes you have this color variable */
+    border-radius: 3px;
+
+    /* This is where the magic happens! */
+    transition: all 350ms ease-out;
+}
+
+.site-header-logo {
+    display: flex;
+    /* Aligns the icon and text side-by-side */
+    align-items: center;
+    /* Vertically centers the icon and text */
+
+
+    font-size: 2.0rem;
+    font-weight: bold;
+    color: var(--light-text);
+    text-decoration: none;
+}
+
+.logo-accent {
+    color: var(--accent-green);
+    /* Uses the accent color from our global styles */
+}
+
+/* --- UPDATED: Mobile Navigation Styles --- */
+
+.hamburger-button {
+    display: none;
+    /* Hidden on desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 15px;
+    /* Make it easier to tap */
+
+    /* The container for our 3 lines */
+    width: 32px;
+    height: 24px;
+    position: relative;
+}
+
+/* Base style for all three lines */
+.hamburger-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--light-text);
+    border-radius: 3px;
+    /* The new bouncy transition from your example */
+    transition: all 400ms cubic-bezier(.84, .06, .52, 1.8);
+}
+
+/* Initial position for the top line (8px above center) */
+.hamburger-line:nth-child(1) {
+    top: 50%;
+    transform: translateY(-8px);
+}
+
+/* Initial position for the middle line (centered) */
+.hamburger-line:nth-child(2) {
+    top: 50%;
+    transform: translateY(0%);
+}
+
+/* Initial position for the bottom line (8px below center) */
+.hamburger-line:nth-child(3) {
+    top: 50%;
+    transform: translateY(8px);
+}
+
+/* --- The 'X' Animation --- */
+
+/* Top line rotates into place */
+.hamburger-button.is-active .hamburger-line:nth-child(1) {
+    transform: rotate(40deg);
+}
+
+/* Middle line fades out */
+.hamburger-button.is-active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+/* Bottom line rotates into place */
+.hamburger-button.is-active .hamburger-line:nth-child(3) {
+    transform: rotate(-40deg);
+}
+
+
+@media (max-width: 768px) {
+    .hamburger-button {
+        display: block;
+        /* Show the button on mobile */
+    }
+
+    /* 1. Main Navigation Container (Top Layer) */
+    .site-header-nav {
+        position: fixed;
+        /* Changed from absolute to cover viewport */
+        top: 0;
+        left: 0;
+        height: 100vh;
+        /* Cover the full screen height */
+        width: 0;
+        /* Start with zero width */
+        background-color: var(--primary-blue);
+        /* This is the top, darker blue */
+        z-index: -1;
+        /* Sits below the hamburger button */
+
+        /* Remove old transform/opacity and prepare for link animation */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        /* Space out the links */
+
+        opacity: 0;
+        visibility: hidden;
+        /* The first bouncy transition */
+        transition: all 600ms cubic-bezier(.62, .04, .3, 1.56);
+    }
+
+    .site-header-nav.is-open {
+        width: 80%;
+        /* Animate to 80% of the screen width */
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* 2. New Background Layer (Bottom Layer) */
+    .nav-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 0;
+        /* Start with zero width */
+        background-color: #64B5F6;
+        /* A lighter shade of blue */
+        z-index: -2;
+        /* Sits behind the main nav container */
+
+        opacity: 0;
+        visibility: hidden;
+        /* The second bouncy transition with a delay */
+        transition: all 500ms cubic-bezier(.62, .04, .3, 1.8);
+        transition-delay: 50ms;
+    }
+
+    .nav-background.is-open {
+        width: 80%;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* 3. Staggered Link Animation */
+    .site-header-nav .site-header-link {
+        font-size: 1.5rem;
+        /* Make links bigger for mobile */
+        opacity: 0;
+        transform: translateY(30px);
+        /* Simple ease-out for the link text */
+        transition: opacity 300ms ease-out, transform 300ms ease-out;
+    }
+
+    /* When the menu is open, animate the links into view */
+    .site-header-nav.is-open .site-header-link {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Apply a cascading delay to each link */
+    .site-header-nav.is-open .site-header-link:nth-child(2) {
+        transition-delay: 250ms;
+    }
+
+    .site-header-nav.is-open .site-header-link:nth-child(3) {
+        transition-delay: 300ms;
+    }
+
+    .site-header-nav.is-open .site-header-link:nth-child(4) {
+        transition-delay: 350ms;
+    }
+
+    .site-header-nav.is-open .site-header-link:nth-child(5) {
+        transition-delay: 400ms;
+    }
+
+    .site-header-nav.is-open .site-header-link:nth-child(6) {
+        transition-delay: 450ms;
+    }
+
+
+    /* Hide the desktop magic line on mobile */
+    .site-header-nav .magic-line {
+        display: none;
+    }
+}

@@ -1,0 +1,11 @@
+/* This creates a flex container that takes up the full height of the screen */
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* This makes the <main> content area expand to fill any available space */
+.app-wrapper main {
+    flex-grow: 1;
+}

@@ -1,0 +1,79 @@
+/* Import the Poppins font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* Modern CSS Reset */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Updated variables based on the new design guide */
+:root {
+    --primary-blue: #0A2A4D;
+    --accent-green: #00C853;
+    --light-text: #FFFFFF;
+    --dark-text: #212121;
+    --secondary-text: #5f6b7a;
+    --background-light: #FFFFFF;
+    --background-grey: #f4f6f8;
+    --container-width: 1100px;
+    --header-height: 70px;
+}
+
+body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    background-color: var(--background-light);
+    color: var(--dark-text);
+}
+
+main {
+    padding-top: var(--header-height);
+}
+
+.container {
+    max-width: var(--container-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--primary-blue);
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+p {
+    color: var(--secondary-text);
+    margin-bottom: 1rem;
+}
+
+/* Updated reusable button style */
+.button {
+    display: inline-block;
+    background-color: var(--accent-green);
+    color: var(--primary-blue);
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 1rem;
+}
+
+.button:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    color: var(--primary-blue);
+}

@@ -1,0 +1,129 @@
+.site-footer {
+    background-color: #333;
+    color: #f4f4f4;
+    text-align: center;
+    padding: 1.5rem 0;
+    margin-top: auto;
+    /* Pushes the footer to the bottom */
+}
+
+.footer {
+    background-color: #1D1D1F;
+    /* Dark Charcoal */
+    color: var(--color-text-secondary);
+    padding: 4rem 5% 2rem 5%;
+    margin-top: 6rem;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 3rem;
+}
+
+.footer-brand h3 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    letter-spacing: 1.5px;
+    color: var(--color-bg-primary);
+    /* Sets heading to White */
+    margin-bottom: 1rem;
+}
+
+.footer-brand p {
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    /* Sets paragraph to Medium Grey */
+}
+
+.footer-links h4 {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-bg-primary);
+    /* Sets heading to White */
+    text-transform: uppercase;
+}
+
+/* This rule targets all text and links in the columns for readability */
+.footer-links p,
+.footer-links a {
+    display: block;
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+    /* Sets links/text to Medium Grey */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--color-accent-red);
+    /* Links turn Red on hover */
+}
+
+.copyright {
+    text-align: center;
+    color: var(--color-text-secondary);
+    /* Sets copyright to Medium Grey */
+    border-top: 1px solid #444;
+    padding-top: 2rem;
+    margin-top: 3rem;
+    font-size: 0.9rem;
+}
+
+/* --- Mobile Footer Styles --- */
+@media (max-width: 768px) {
+    .footer {
+        padding: 2rem 1.5rem;
+        /* reduce side padding */
+        margin-top: 3rem;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        /* stack all columns */
+        gap: 2rem;
+        /* slightly tighter spacing */
+        padding-bottom: 2rem;
+    }
+
+    .footer-brand h3 {
+        font-size: 1.6rem;
+        text-align: center;
+    }
+
+    .footer-brand {
+        text-align: center;
+        /* centers ALL child text (h3 + p) */
+        max-width: 600px;
+        /* optional: keep lines from getting too wide */
+        margin: 0 auto;
+        /* keeps it centered inside grid column */
+    }
+    
+
+    .footer-links {
+        text-align: center;
+        /* center links on mobile */
+    }
+
+    .footer-links h4 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .footer-links a,
+    .footer-links p {
+        font-size: 0.9rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .copyright {
+        font-size: 0.8rem;
+        padding-top: 1.5rem;
+        margin-top: 2rem;
+    }
+}

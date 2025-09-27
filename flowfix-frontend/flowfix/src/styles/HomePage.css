@@ -1,0 +1,456 @@
+/* --- 1. Hero Section --- */
+.hero-section {
+    /* The section is now just a container */
+    position: relative;
+    padding: 5rem 0;
+    color: var(--light-text);
+    text-align: center;
+    overflow: hidden;
+    /* Important: hides the parts of the image that move outside the container */
+}
+
+.hero-background-image {
+    background-image: url('https://dudleycol.ac.uk/wp-content/uploads/2022/10/Construction_Plumbing-scaled.jpg');
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    top: -20%;
+    /* Start the image slightly higher to allow it to move up */
+    left: 0;
+    width: 100%;
+    height: 140%;
+    /* Make the image taller than the container */
+    z-index: -2;
+    /* Place it behind everything */
+}
+
+/* We apply the dark overlay to the main container now */
+.hero-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 42, 77, 0.7);
+    z-index: -1;
+    /* Place it between the image and the content */
+}
+
+.hero-content {
+    position: relative;
+    /* Ensure content sits correctly in the stacking order */
+    z-index: 1;
+}
+
+.hero-text {
+    max-width: 700px;
+    /* Allow text to be a bit wider */
+}
+
+.hero-text h1 {
+    color: var(--light-text);
+    font-size: 3.2rem;
+    /* Make title bigger */
+    margin-bottom: 1rem;
+}
+
+.hero-text p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2rem;
+    /* Make subtitle bigger */
+    margin-bottom: 2.5rem;
+}
+
+/* === NEW STYLES FOR THE BUTTON === */
+.hero-button {
+    font-size: 1.2rem;
+    padding: 18px 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.button-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+/* === REMOVED STYLES === */
+/* .hero-ai-placeholder, .ai-greeting, .ai-input-box styles are no longer needed */
+
+
+/* --- 2. Trust Bar --- */
+.trust-bar {
+    background-color: var(--background-grey);
+}
+
+.trust-bar-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.trust-signal {
+    font-weight: 600;
+    color: var(--secondary-text);
+}
+
+/* --- 3. How It Works Section --- */
+.how-it-works-section {
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.how-it-works-section h2 {
+    margin-bottom: 3rem;
+    font-size: 2rem;
+}
+
+/* Find and replace your existing .steps-grid styles with this */
+.steps-grid {
+    display: grid;
+    gap: 2rem;
+    /* On mobile, the pipes will be hidden, so we keep the grid as is */
+}
+
+/* Add these new styles for the pipes */
+.pipe-connector {
+    display: none;
+    /* Hide pipes by default on mobile */
+    width: 100px;
+    height: 50px;
+    stroke: #d0d0d0;
+    /* Light grey color for the pipe */
+}
+
+
+/* Find your @media (min-width: 768px) block and update the .steps-grid styles inside it */
+@media (min-width: 768px) {
+    /* ... other styles ... */
+
+    .steps-grid {
+        /* On larger screens, switch to flexbox to align steps and pipes */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        grid-template-columns: none;
+        /* Disable the grid layout */
+    }
+
+    .pipe-connector {
+        display: block;
+        /* Show the pipes on larger screens */
+    }
+
+    .step {
+        flex-basis: 30%;
+        /* Ensure steps take up a good portion of the space */
+    }
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    background-color: var(--accent-green);
+    color: var(--primary-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 auto 1.5rem auto;
+}
+
+.step h3 {
+    margin-bottom: 0.5rem;
+}
+
+/* --- 4. Services Section --- */
+.services-section {
+    padding: 4rem 0;
+    background-color: var(--background-grey);
+    text-align: center;
+}
+
+.services-section h2 {
+    margin-bottom: 3rem;
+    font-size: 2rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.service-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    /* This centers vertically (Y-axis) */
+    justify-content: center;
+    /* <-- ADD THIS LINE for horizontal (X-axis) centering */
+    gap: 0.75rem;
+}
+/* --- Responsive Design --- */
+@media (min-width: 768px) {
+    .hero-section {
+        text-align: left;
+    }
+
+    .hero-content {
+        align-items: flex-start;
+    }
+
+    .trust-bar-content {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .steps-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .services-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* --- Definitive Button Animation --- */
+
+.animated-cta-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    overflow: hidden;
+    /* CRITICAL: Hides the lines when they are outside the button */
+    text-decoration: none;
+    background-color: var(--accent-green);
+    color: var(--primary-blue);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.animated-cta-button:hover {
+    background-color: #00b34a;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Position the visible content above the animation lines */
+.animated-cta-button .button-icon,
+.animated-cta-button .button-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* General styles for all four animating spans */
+.animated-cta-button span:nth-child(-n+4) {
+    position: absolute;
+    /* This background creates the rainbow effect that will be animated */
+    background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+    background-size: 400%;
+    /* Make the gradient large enough to shift */
+}
+
+/* HomePage.css */
+
+/* === MOVEMENT & COLOR ANIMATIONS === */
+
+/* Animation 1: HUE ROTATE for the rainbow color cycle */
+@keyframes hue-change {
+    from {
+        filter: hue-rotate(0deg);
+    }
+
+    to {
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* TOP LINE */
+.animated-cta-button span:nth-child(1) {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2.5px;
+    transform: translateX(-100%);
+    animation:
+        anim-top 2s ease-in-out infinite,
+        /* <-- CHANGED duration to 1s */
+        hue-change 4s linear infinite;
+    animation-delay: 0s;
+    /* <-- CHANGED delay to 0s */
+}
+
+@keyframes anim-top {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* RIGHT LINE */
+.animated-cta-button span:nth-child(2) {
+    top: 0;
+    right: 0;
+    width: 2.5px;
+    height: 100%;
+    transform: translateY(-100%);
+    animation:
+        anim-right 2s ease-in-out infinite,
+        /* <-- CHANGED duration to 1s */
+        hue-change 4s linear infinite;
+    animation-delay: 1s;
+    /* <-- CHANGED delay to 0.5s */
+}
+
+@keyframes anim-right {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(100%);
+    }
+}
+
+/* BOTTOM LINE */
+.animated-cta-button span:nth-child(3) {
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 2.5px;
+    transform: translateX(100%);
+    animation:
+        anim-bottom 2s ease-in-out infinite,
+        /* <-- CHANGED duration to 1s */
+        hue-change 4s linear infinite;
+    animation-delay: 0s;
+    /* <-- CHANGED delay to 0s */
+}
+
+@keyframes anim-bottom {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* LEFT LINE */
+.animated-cta-button span:nth-child(4) {
+    bottom: 0;
+    left: 0;
+    width: 2.5px;
+    height: 100%;
+    transform: translateY(100%);
+    animation:
+        anim-left 2s ease-in-out infinite,
+        /* <-- CHANGED duration to 1s */
+        hue-change 4s linear infinite;
+    animation-delay: 1s;
+    /* <-- CHANGED delay to 0.5s */
+}
+
+@keyframes anim-left {
+    0% {
+        transform: translateY(100%);
+    }
+
+    100% {
+        transform: translateY(-100%);
+    }
+}
+
+
+/*############ 
+/* --- 5. Why Choose Us Section --- */
+
+.why-us-section {
+    padding: 4rem 0;
+    background-color: var(--background-light);
+    text-align: center;
+}
+
+.why-us-section h2 {
+    margin-bottom: 3rem;
+    font-size: 2rem;
+}
+
+.why-us-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.why-us-image img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.315);
+}
+
+.why-us-text ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.why-us-text li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.why-us-text li:last-child {
+    margin-bottom: 0;
+}
+
+.list-icon {
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+.why-us-text strong {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.25rem;
+}
+
+.why-us-text p {
+    margin: 0;
+    color: var(--secondary-text);
+}
+
+/* Responsive layout for larger screens */
+@media (min-width: 768px) {
+    .why-us-content {
+        grid-template-columns: 1fr 1fr;
+    }
+}
