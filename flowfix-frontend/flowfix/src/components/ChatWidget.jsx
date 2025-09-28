@@ -48,7 +48,7 @@ function ChatWidget({ isOpen, onClose }) {
 
         try {
             // The 'fetch' call to our Python backend API
-            const response = await fetch('http://api.verndigital.com/chat', {
+            const response = await fetch('https://api.verndigital.com/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
