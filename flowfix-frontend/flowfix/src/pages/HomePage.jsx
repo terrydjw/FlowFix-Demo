@@ -139,7 +139,7 @@ function HomePage({ onOpenChat }) {
                     <h2>The Smartest, Most Convenient Choice</h2>
                     <div className="why-us-content">
                         <div ref={whyImageRef} className={`why-us-image fade-in-up ${whyImageInView ? 'is-visible' : ''}`} style={{ transitionDelay: '0.2s' }}>
-                            <img src="https://img.freepik.com/free-photo/plumbing-professional-doing-his-job_23-2150721543.jpg?semt=ais_hybrid&w=740&q=80" alt="Friendly and professional FlowFix plumber" />
+                            <img src="https://www.allshoreplumbingheat.com/wp-content/uploads/2025/07/A-high-quality-realistic-image-representing-reliable-plumbing-services-in-suburban-areas-like-Farmi.webp" alt="Friendly and professional FlowFix plumber" />
                         </div>
                         <div ref={whyListRef} className={`why-us-text fade-in-up ${whyListInView ? 'is-visible' : ''}`} style={{ transitionDelay: '0.4s' }}>
                             <ul>

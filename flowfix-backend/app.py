@@ -10,7 +10,8 @@ from flask_cors import CORS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.tools import tool
-from langchain_community.chat_message_histories import ChatMessageHistory
+# --- MODIFIED: Import RedisChatMessageHistory ---
+from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.messages import AIMessage
 
@@ -19,32 +20,47 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 import calendar_utils
+
+# --- PROXY CONFIGURATION FOR PYTHONANYWHERE ---
+proxy_url = 'http://proxy.server:3128'
+os.environ['HTTP_PROXY'] = proxy_url
+os.environ['HTTPS_PROXY'] = proxy_url
+
+# --- GET ABSOLUTE PATHS ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(BASE_DIR, 'config.json')
+FAISS_INDEX_PATH = os.path.join(BASE_DIR, "faiss_index")
 
 # --- INITIALIZATION ---
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-with open('config.json', 'r') as f:
+# --- NEW: GET REDIS URL FROM ENVIRONMENT VARIABLES ---
+# This is crucial for connecting to your PythonAnywhere Redis instance.
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL:
+    raise ValueError("REDIS_URL environment variable not set.")
+
+
+with open(CONFIG_PATH, 'r') as f:
     config = json.load(f)
 
-# Use a more advanced model that's better at function calling
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.6)
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 # --- KNOWLEDGE BASE (RAG) TOOL ---
-# We are now turning our knowledge base into a formal "tool"
 try:
-    loader = TextLoader("knowledge_base.md")
-    documents = loader.load()
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-    docs = text_splitter.split_documents(documents)
-    vector_store = FAISS.from_documents(docs, embeddings)
+    vector_store = FAISS.load_local(
+        FAISS_INDEX_PATH,
+        embeddings,
+        allow_dangerous_deserialization=True
+    )
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})
     
     rag_prompt = ChatPromptTemplate.from_template("""Answer the user's question based only on the following context. If the context doesn't contain the answer, say you don't have that information.
@@ -56,15 +72,13 @@ Question: {input}""")
     
     question_answer_chain = create_stuff_documents_chain(llm, rag_prompt)
     rag_chain = create_retrieval_chain(retriever, question_answer_chain)
-    print("Knowledge base loaded successfully.")
+    print("Knowledge base loaded successfully from local faiss_index.")
 except Exception as e:
-    print(f"Error loading knowledge base: {e}")
+    print(f"CRITICAL Error loading knowledge base from local index: {e}")
     rag_chain = None
 
 # --- AGENT TOOLS DEFINITION ---
-# Here we define the functions the AI agent can use.
-# The '@tool' decorator and the docstring are crucial.
-# The AI reads the docstring to understand what the tool does.
+# No changes are needed in the tools themselves.
 
 @tool
 def get_general_information(query: str) -> str:
@@ -91,7 +105,7 @@ def check_emergency_availability(postcode: str) -> str:
     if is_blocked:
         return "I'm very sorry, but the plumber is currently on another emergency job and is not immediately available. Please try another service."
     else:
-        return f"The plumber appears to be available for an emergency call-out. The fee is {config['emergency_info']['fee']}, which includes the first hour of labour. **Please call {config['business_phone_number']} immediately** to confirm and provide your full address. This line is for emergencies only."
+        return f"The plumber appears to be available for an emergency call-out. The fee is {config['emergency_info']['fee']}, which includes the first hour of labour. Please call {config['business_phone_number']} immediately to confirm and provide your full address. This line is for emergencies only."
 
 @tool
 def find_available_appointment_slots(date: str) -> str:
@@ -108,23 +122,19 @@ def find_available_appointment_slots(date: str) -> str:
     except Exception as e:
         return f"There was an error finding slots: {e}"
     
-
 @tool
 def book_appointment(date: str, time: str, service_needed: str, customer_name: str, customer_phone: str) -> str:
     """
     Books a non-emergency plumbing appointment in the calendar. You MUST have the exact date (in 'YYYY-MM-DD' format), time (in 'HH:MM AM/PM' or 'HH:MM' 24-hour format), a description of the service needed, the customer's full name, and their phone number before using this tool. If you are missing any of this information, you must ask the user for it.
     """
     try:
-        # Attempt to parse time in AM/PM format
         start_datetime_obj = datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %I:%M %p")
     except ValueError:
-        # If that fails, try 24-hour format
         try:
             start_datetime_obj = datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
         except ValueError:
             return "Invalid date or time format. Please confirm the time with the user and provide it in 'HH:MM AM/PM' or 'HH:MM' (24-hour) format."
 
-    # Assume a 1-hour appointment duration
     end_datetime_obj = start_datetime_obj + datetime.timedelta(hours=1)
     
     start_time_iso = start_datetime_obj.isoformat()
@@ -133,7 +143,6 @@ def book_appointment(date: str, time: str, service_needed: str, customer_name: s
     summary = f"Plumbing: {service_needed} for {customer_name}"
     description = f"Service: {service_needed} for {customer_name} ({customer_phone})."
 
-    # Call the function from calendar_utils to create the event
     result = calendar_utils.create_appointment(
         summary=summary,
         description=description,
@@ -144,7 +153,6 @@ def book_appointment(date: str, time: str, service_needed: str, customer_name: s
     )
     return result
 
-# Combine all our tools into a list
 tools = [
     get_general_information,
     check_emergency_availability,
@@ -153,9 +161,7 @@ tools = [
 ]
 
 # --- AGENT SETUP ---
-# This is the "brain" of our new agent.
 agent_prompt = ChatPromptTemplate.from_messages([
-    # This is the new, more forceful prompt
     ("system", """
     Your Persona: You are Vern, a helpful and friendly AI assistant for FlowFix Plumbers.
     
@@ -172,45 +178,59 @@ agent_prompt = ChatPromptTemplate.from_messages([
     ("placeholder", "{agent_scratchpad}"),
 ])
 
-# Create the agent itself
 agent = create_tool_calling_agent(llm, tools, agent_prompt)
-
-# This creates the executor that runs the agent, tools, and manages the process
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-# This is our conversational memory. We'll store one conversation for the demo.
-# For a real app, you would have a dictionary of histories keyed by a user/session ID.
-demo_chat_history = ChatMessageHistory()
+# --- DELETED: OLD MEMORY MANAGEMENT ---
+# The global session_histories dictionary and get_session_history function have been removed.
 
-initial_message = "Hi! I am Vern, the FlowFix AI assistant. How can I help with your plumbing today?"
-demo_chat_history.add_message(AIMessage(content=initial_message))
-
-# This wraps our agent executor and connects it to the chat history
+# --- NEW: REDIS-BACKED MEMORY MANAGEMENT ---
+# This function factory creates a new Redis-backed history object for each unique session_id.
+# All worker processes connect to the same Redis server, so the history is shared.
+def get_redis_session_history(session_id: str) -> RedisChatMessageHistory:
+    """
+    Gets the chat history for a given session ID from the central Redis store.
+    If the session is new, it pre-loads the AI's initial greeting into the history.
+    """
+    history = RedisChatMessageHistory(session_id, url=REDIS_URL, ttl=7200)
+    
+    # If the history is empty, it's a new session.
+    if not history.messages:
+        # Pre-load the history with the initial greeting to match the front-end.
+        # This ensures the agent knows it has already introduced itself and won't repeat the greeting.
+        initial_message = "Hi! I am Vern, the FlowFix AI assistant. How can I help with your plumbing today?"
+        history.add_message(AIMessage(content=initial_message))
+        
+    return history
+# This wraps our agent and connects it to our new Redis history function
 conversational_agent = RunnableWithMessageHistory(
     agent_executor,
-    lambda session_id: demo_chat_history, # Function to get the history
+    get_redis_session_history, # <-- Use our new Redis function here
     input_messages_key="input",
     history_messages_key="chat_history",
 )
+# --- END NEW MEMORY SECTION ---
 
 # --- FLASK API ENDPOINT ---
+# Note: A small change is made here to handle the initial greeting more robustly.
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
     user_message = data.get("message")
+    session_id = data.get("session_id")
     
-    if not user_message:
-        return jsonify({"error": "No message provided"}), 400
+    if not user_message or not session_id:
+        return jsonify({"error": "No message or session_id provided"}), 400
 
-    # Invoke the conversational agent. The session_id is a placeholder for this demo.
+    # The front-end now controls the initial greeting. The backend just responds.
+    # This simplifies the logic and ensures Redis isn't touched until the first user message.
     response = conversational_agent.invoke(
         {"input": user_message},
-        config={"configurable": {"session_id": "demo_session"}}
+        config={"configurable": {"session_id": session_id}}
     )
     
     ai_response = response['output']
     return jsonify({"response": ai_response})
-
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

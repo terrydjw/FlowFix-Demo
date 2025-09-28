@@ -1,12 +1,18 @@
 import datetime
 import os.path
 import json
+import pytz  # <-- NEW: Import pytz library
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+# --- GET ABSOLUTE PATHS ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CREDENTIALS_PATH = os.path.join(BASE_DIR, 'credentials.json')
+TOKEN_PATH = os.path.join(BASE_DIR, 'token.json')
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
@@ -25,15 +31,15 @@ def get_calendar_service():
     Handles the OAuth2 flow and stores/refreshes credentials.
     """
     creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    if os.path.exists(TOKEN_PATH):
+        creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
             creds = flow.run_local_server(port=0)
-        with open("token.json", "w") as token:
+        with open(TOKEN_PATH, "w") as token:
             token.write(creds.to_json())
 
     try:
@@ -45,27 +51,34 @@ def get_calendar_service():
 
 def find_available_slots(start_date_str, duration_minutes=60):
     """
-    Finds available 1-hour slots within business hours for a given day.
+    Finds available 1-hour slots within business hours for a given day,
+    using the Europe/London timezone consistently.
     """
     service = get_calendar_service()
     if not service:
         return ["Error connecting to calendar."]
 
-    day_start = datetime.datetime.fromisoformat(f"{start_date_str}T00:00:00")
-    day_end = day_start + datetime.timedelta(days=1)
+    # --- START OF FIX ---
+    # 1. Define the correct, non-changing timezone
+    london_tz = pytz.timezone("Europe/London")
 
-    tz_info = datetime.datetime.now().astimezone().tzinfo
-    day_start = day_start.astimezone(tz_info)
-    day_end = day_end.astimezone(tz_info)
+    # 2. Create a "naive" datetime object at midnight
+    naive_day_start = datetime.datetime.fromisoformat(f"{start_date_str}T00:00:00")
+    
+    # 3. Make the datetime "aware" by localizing it to the London timezone
+    day_start = london_tz.localize(naive_day_start)
+    day_end = day_start + datetime.timedelta(days=1)
+    # --- END OF FIX ---
 
     try:
         free_busy_response = (
             service.freebusy()
             .query(
                 body={
+                    # --- FIX: Use timezone-aware isoformat strings and specify London timezone
                     "timeMin": day_start.isoformat(),
                     "timeMax": day_end.isoformat(),
-                    "timeZone": str(tz_info),
+                    "timeZone": "Europe/London", 
                     "items": [{"id": "primary"}],
                 }
             )
@@ -78,6 +91,7 @@ def find_available_slots(start_date_str, duration_minutes=60):
     busy_intervals = free_busy_response["calendars"]["primary"]["busy"]
     available_slots = []
     
+    # --- FIX: Ensure potential slots are also created in the London timezone
     potential_slot_start = day_start.replace(
         hour=BUSINESS_HOURS_START.hour, 
         minute=BUSINESS_HOURS_START.minute, 
@@ -100,9 +114,11 @@ def find_available_slots(start_date_str, duration_minutes=60):
 
         is_free = True
         for busy_period in busy_intervals:
+            # Google API returns timezone-aware ISO strings, fromisoformat handles them correctly
             busy_start = datetime.datetime.fromisoformat(busy_period["start"])
             busy_end = datetime.datetime.fromisoformat(busy_period["end"])
             
+            # All comparisons are now between timezone-aware datetimes
             if potential_slot_start < busy_end and potential_slot_end > busy_start:
                 is_free = False
                 break
@@ -122,17 +138,16 @@ def create_appointment(summary, description, start_time_str, end_time_str, custo
     if not service:
         return "Error: Could not connect to Google Calendar."
 
-    # This is the dictionary where we make the change
     event = {
         "summary": summary,
         "description": f"{description}\nCustomer: {customer_name}\nPhone: {customer_phone}",
         "start": {
             "dateTime": start_time_str,
-            "timeZone": "Europe/London"  # <-- THE FIX
+            "timeZone": "Europe/London"
         },
         "end": {
             "dateTime": end_time_str,
-            "timeZone": "Europe/London"  # <-- THE FIX
+            "timeZone": "Europe/London"
         },
     }
     
@@ -142,6 +157,7 @@ def create_appointment(summary, description, start_time_str, end_time_str, custo
     except HttpError as error:
         print(f"An error occurred creating the event: {error}")
         return "Sorry, I was unable to create the appointment. Please try again."
+
 def check_for_emergency_blocks(hours_to_check=3):
     """
     Checks if there are any events with the emergency block summary in the next few hours.
@@ -158,8 +174,8 @@ def check_for_emergency_blocks(hours_to_check=3):
             service.events()
             .list(
                 calendarId="primary",
-                timeMin=now.isoformat() + "Z",
-                timeMax=time_max.isoformat() + "Z",
+                timeMin=now.isoformat() + "Z", # Use UTC for this check
+                timeMax=time_max.isoformat() + "Z", # Use UTC for this check
                 q=EMERGENCY_BLOCK_SUMMARY,
                 singleEvents=True,
                 orderBy="startTime",

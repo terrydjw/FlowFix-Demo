@@ -11,8 +11,18 @@ function ChatWidget({ isOpen, onClose }) {
     // State to show a "typing..." indicator while waiting for the backend
     const [isLoading, setIsLoading] = useState(false);
 
+    // --- NEW: SESSION ID STATE ---
+    const [sessionId, setSessionId] = useState(null);
+
     // This is a ref that will point to the bottom of the message list
     const messagesEndRef = useRef(null);
+
+    // This effect runs only once when the component first mounts
+    useEffect(() => {
+        // Create a simple, random session ID for this chat session
+        setSessionId(Date.now().toString() + Math.random().toString(36).substring(2));
+    }, []);
+    // --- END NEW ---
 
     // This function smoothly scrolls the chat to the latest message
     const scrollToBottom = () => {
@@ -38,12 +48,15 @@ function ChatWidget({ isOpen, onClose }) {
 
         try {
             // The 'fetch' call to our Python backend API
-            const response = await fetch('http://127.0.0.1:5000/chat', {
+            const response = await fetch('http://api.verndigital.com/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: userMessage.text }),
+                body: JSON.stringify({
+                    message: userMessage.text,
+                    session_id: sessionId
+                }),
             });
 
             if (!response.ok) {
