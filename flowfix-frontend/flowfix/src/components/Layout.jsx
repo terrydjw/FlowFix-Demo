@@ -3,10 +3,10 @@ import Header from './Header';
 import Footer from './Footer';
 import '../styles/Layout.css'; // Import the new layout styles
 
-function Layout({ children }) {
+function Layout({ children, onHamburgerClick }) {
     return (
         <div className="app-wrapper">
-            <Header />
+            <Header onHamburgerClick={onHamburgerClick} />
             <main>
                 {children}
             </main>

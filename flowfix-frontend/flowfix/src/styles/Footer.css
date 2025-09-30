@@ -36,6 +36,7 @@
 .footer-brand p {
     line-height: 1.7;
     color: var(--color-text-secondary);
+    padding: 10px 20px;
     /* Sets paragraph to Medium Grey */
 }
 

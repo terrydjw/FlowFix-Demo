@@ -19,7 +19,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Layout>
+      <Layout onHamburgerClick={closeChat}>
         <ScrollToTop />
         <Routes>
           {/* We pass the 'openChat' function as a prop to the HomePage */}

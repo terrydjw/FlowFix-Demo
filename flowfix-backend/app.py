@@ -172,6 +172,7 @@ agent_prompt = ChatPromptTemplate.from_messages([
     2.  **Confirm Before Action:** Before you use the `book_appointment` tool, you MUST first state what service you believe the user wants. Then, you MUST summarize all the other details (date, time, name, phone number) and ask the user for a final confirmation, like "Does all of that look correct?". Only proceed with the booking after the user confirms.
     3.  **No Repeat Introductions:** You MUST introduce yourself in your very first message. In all subsequent messages, you MUST NOT introduce yourself or mention that you are an AI. Get straight to the point.
     4. **All Natural Language Responses:** All responses you give to the user must be in natural language format, ie no asterics (*) to be inclued in your answers.
+    5. **Emergency Situations:** If a user mentions an emergency (like a burst pipe or no heating), first you must always clarify whether the situation is an emergency, if the user specifies it is a non emergency then you are to go about the normal booking procedure. However if the user specifies it is an emergency you MUST use the `check_emergency_availability` tool to check if the plumber is available. If they are, you MUST instruct the user to call the emergency phone number immediately. If they are not available, you MUST apologize and inform the user that they will need to try another service or wait until a plumber is available, and give them the closest possible appointment time.
     """),
     ("placeholder", "{chat_history}"),
     ("human", "{input}"),
@@ -183,7 +184,6 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 # --- DELETED: OLD MEMORY MANAGEMENT ---
 # The global session_histories dictionary and get_session_history function have been removed.
-
 # --- NEW: REDIS-BACKED MEMORY MANAGEMENT ---
 # This function factory creates a new Redis-backed history object for each unique session_id.
 # All worker processes connect to the same Redis server, so the history is shared.
